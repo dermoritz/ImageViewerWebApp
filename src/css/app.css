@@ -1,0 +1,36 @@
+/* Minimal Image Viewer CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+}
+
+.image-container {
+    width: 100vw;
+    height: 100vh;
+    cursor: default;
+}
+
+.image {
+    display: block;
+    user-select: none;
+}
+
+.loading, .error {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 18px;
+}
+
+.error {
+    color: #ff4444;
+}

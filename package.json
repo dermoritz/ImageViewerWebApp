@@ -1,0 +1,24 @@
+{
+  "name": "image-viewer",
+  "version": "1.0.0",
+  "description": "Minimalistic image viewer with zoom and pan",
+  "scripts": {
+    "dev": "node dev-server.js",
+    "dev-python": "cd src && python -m http.server 3000",
+    "dev-node": "cd src && npx serve -p 3000",
+    "install-deps": "npm install express http-proxy-middleware"
+  },
+  "keywords": [
+    "image",
+    "viewer",
+    "zoom",
+    "pan",
+    "javascript"
+  ],
+  "author": "Moritz",
+  "license": "MIT",
+  "devDependencies": {
+    "express": "^4.21.2",
+    "http-proxy-middleware": "^2.0.9"
+  }
+}
