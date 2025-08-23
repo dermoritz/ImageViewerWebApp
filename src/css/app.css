@@ -40,16 +40,19 @@ html, body {
     position: fixed;
     top: 20px;
     left: 20px;
-    background: rgba(0, 0, 0, 0.8);
+    min-width: 200px;
+    width: 300px;
+    background: rgba(0, 0, 0, 0.85);
     color: #fff;
-    padding: 12px 16px;
     border-radius: 8px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 14px;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     transition: opacity 0.3s ease, transform 0.3s ease;
     z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
 }
 
 .metadata-box.visible {
@@ -63,7 +66,53 @@ html, body {
     pointer-events: none;
 }
 
+.metadata-drag-handle {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    cursor: grab;
+    user-select: none;
+    font-size: 12px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.metadata-drag-handle:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.metadata-drag-handle:active {
+    cursor: grabbing;
+}
+
 .metadata-filename {
+    padding: 12px 16px;
     font-weight: 500;
     word-break: break-all;
+    line-height: 1.4;
+}
+
+.metadata-resize-handle {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 30px;
+    cursor: ew-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 16px;
+    user-select: none;
+    transition: color 0.2s ease;
+}
+
+.metadata-resize-handle:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
 }
