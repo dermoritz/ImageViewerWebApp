@@ -34,3 +34,36 @@ html, body {
 .error {
     color: #ff4444;
 }
+
+/* Metadata Display */
+.metadata-box {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+}
+
+.metadata-box.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.metadata-box.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+}
+
+.metadata-filename {
+    font-weight: 500;
+    word-break: break-all;
+}

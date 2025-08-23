@@ -5,11 +5,18 @@ class ImageLoader {
         this.maxIndex = null;
         this.currentIndex = null;
         this.stateManager = null; // Will be set by main app
+        this.metadataDisplay = null; // Will be set by main app
+        this.currentMetadata = null;
     }
     
     // Set the state manager reference
     setStateManager(stateManager) {
         this.stateManager = stateManager;
+    }
+    
+    // Set the metadata display reference
+    setMetadataDisplay(metadataDisplay) {
+        this.metadataDisplay = metadataDisplay;
     }
 
     async initialize() {
@@ -57,10 +64,20 @@ class ImageLoader {
                 throw new Error(`HTTP ${response.status}`);
             }
 
+            // Extract metadata from headers
+            const contentDisposition = response.headers.get('Content-Disposition');
+            const filename = this.parseContentDisposition(contentDisposition);
+            this.currentMetadata = { filename };
+
             const blob = await response.blob();
             this.currentIndex = index;
             const imageUrl = URL.createObjectURL(blob);
             this.elements.image.src = imageUrl;
+            
+            // Update metadata display if available
+            if (this.metadataDisplay) {
+                this.metadataDisplay.updateMetadata(this.currentMetadata);
+            }
             
             // Update URL state if requested
             if (updateUrl && this.stateManager) {
@@ -70,6 +87,16 @@ class ImageLoader {
         } catch (error) {
             this.onImageError(error.message);
         }
+    }
+    
+    // Extract filename from Content-Disposition header
+    parseContentDisposition(headerValue) {
+        if (!headerValue) return null;
+        
+        // Parse "inline; filename="example.jpg""
+        const regex = /filename="([^"]+)"/;
+        const match = regex.exec(headerValue);
+        return match ? match[1] : null;
     }
 
     onImageError(message = 'Failed to load image') {

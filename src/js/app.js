@@ -17,10 +17,12 @@ class ImageViewer {
         this.imageLoader = new ImageLoader(this.config, this.elements);
         this.zoomPan = new ZoomPan(this.elements);
         this.stateManager = new StateManager(this.imageLoader);
-        this.eventHandler = new EventHandler(this.elements, this.zoomPan, this.imageLoader, this.stateManager);
+        this.metadataDisplay = new MetadataDisplay(this.elements);
+        this.eventHandler = new EventHandler(this.elements, this.zoomPan, this.imageLoader, this.stateManager, this.metadataDisplay);
         
-        // Connect state manager to image loader
+        // Connect dependencies
         this.imageLoader.setStateManager(this.stateManager);
+        this.imageLoader.setMetadataDisplay(this.metadataDisplay);
         
         this.eventHandler.setupEventListeners();
         

@@ -1,9 +1,10 @@
 class EventHandler {
-    constructor(elements, zoomPan, imageLoader, stateManager) {
+    constructor(elements, zoomPan, imageLoader, stateManager, metadataDisplay) {
         this.elements = elements;
         this.zoomPan = zoomPan;
         this.imageLoader = imageLoader;
         this.stateManager = stateManager;
+        this.metadataDisplay = metadataDisplay;
         this.pointerPosition = { x: null, y: null };
     }
 
@@ -49,6 +50,9 @@ class EventHandler {
         } else if (event.code === 'KeyW') {
             event.preventDefault();
             this.stateManager.goBack();
+        } else if (event.code === 'KeyQ') {
+            event.preventDefault();
+            this.metadataDisplay.toggle();
         }
     }
 }
