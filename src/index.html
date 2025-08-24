@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
+    <div class="filter-box metadata-box" id="filterBox">
+        <div class="drag-handle"></div>
+        <input type="text" id="filterInput" placeholder="Filter..." />
+        <div class="filter-count" id="filterCount" style="display: none;"></div>
+        <button id="filterBtn">⚙</button>
+    </div>
+    
     <div class="image-container" id="imageContainer">
         <img id="image" class="image" src="" alt="Loading..." />
     </div>
@@ -19,6 +26,7 @@
     <script src="js/modules/ZoomPan.js"></script>
     <script src="js/modules/StateManager.js"></script>
     <script src="js/modules/MetadataDisplay.js"></script>
+    <script src="js/modules/FilterManager.js"></script>
     <script src="js/modules/EventHandler.js"></script>
     <script src="js/app.js"></script>
 </body>

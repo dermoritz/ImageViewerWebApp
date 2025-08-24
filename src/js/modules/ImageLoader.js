@@ -30,34 +30,48 @@ class ImageLoader {
         }
     }
     
-    async fetchMaxIndex() {
-        const url = `${this.config.apiBaseUrl}/api/images/maxIndex`;
+    async fetchMaxIndex(filter) {
+        const url = filter ? 
+            `${this.config.apiBaseUrl}/api/filter/${encodeURIComponent(filter)}/maxIndex` :
+            `${this.config.apiBaseUrl}/api/images/maxIndex`;
         const response = await fetch(url);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
         
-        const data = await response.json();
-        return data.maxIndex || data; // Handle both {maxIndex: n} and plain number responses
+        // Both endpoints return plain text according to API docs
+        const data = await response.text();
+        return parseInt(data, 10);
     }
 
     async loadRandomImage() {
+        await this.loadRandom();
+    }
+    
+    async loadRandom(filter) {
         if (this.maxIndex === null) {
             const initialized = await this.initialize();
             if (!initialized) return;
         }
         
-        const randomIndex = Math.floor(Math.random() * (this.maxIndex + 1));
-        await this.loadImageByIndex(randomIndex);
+        const maxIndex = await this.fetchMaxIndex(filter);
+        const randomIndex = Math.floor(Math.random() * (maxIndex + 1));
+        await this.loadByIndex(randomIndex, true, filter);
     }
     
     async loadImageByIndex(index, updateUrl = true) {
+        await this.loadByIndex(index, updateUrl);
+    }
+    
+    async loadByIndex(index, updateUrl = true, filter = null) {
         this.showLoading();
         this.hideError();
 
         try {
-            const url = `${this.config.apiBaseUrl}/api/images/${index}`;
+            const url = filter ? 
+                `${this.config.apiBaseUrl}/api/filter/${encodeURIComponent(filter)}/images/${index}` :
+                `${this.config.apiBaseUrl}/api/images/${index}`;
             const response = await fetch(url);
 
             if (!response.ok) {
@@ -67,7 +81,7 @@ class ImageLoader {
             // Extract metadata from headers
             const contentDisposition = response.headers.get('Content-Disposition');
             const filename = this.parseContentDisposition(contentDisposition);
-            this.currentMetadata = { filename };
+            this.currentMetadata = filter ? { filename, filter, index } : { filename };
 
             const blob = await response.blob();
             this.currentIndex = index;
@@ -81,7 +95,9 @@ class ImageLoader {
             
             // Update URL state if requested
             if (updateUrl && this.stateManager) {
-                this.stateManager.updateUrl(index);
+                filter ? 
+                    this.stateManager.updateUrl(filter, index) :
+                    this.stateManager.updateUrl(null, index);
             }
 
         } catch (error) {

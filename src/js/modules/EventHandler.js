@@ -1,10 +1,11 @@
 class EventHandler {
-    constructor(elements, zoomPan, imageLoader, stateManager, metadataDisplay) {
+    constructor(elements, zoomPan, imageLoader, stateManager, metadataDisplay, filterManager) {
         this.elements = elements;
         this.zoomPan = zoomPan;
         this.imageLoader = imageLoader;
         this.stateManager = stateManager;
         this.metadataDisplay = metadataDisplay;
+        this.filterManager = filterManager;
         this.pointerPosition = { x: null, y: null };
     }
 
@@ -44,9 +45,13 @@ class EventHandler {
     }
 
     onKeyDown(event) {
+        if (event.target.tagName === 'INPUT') return; // Skip if typing in filter
+        
         if (event.code === 'Space' || event.code === 'KeyS') {
             event.preventDefault();
-            this.imageLoader.loadRandomImage();
+            this.filterManager.isActive() ? 
+                this.filterManager.navigateRandom() : 
+                this.imageLoader.loadRandomImage();
         } else if (event.code === 'KeyW') {
             event.preventDefault();
             this.stateManager.goBack();

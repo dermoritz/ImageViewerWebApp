@@ -17,41 +17,50 @@ class MetadataDisplay {
         this.metadataBox.id = 'metadataBox';
         this.metadataBox.className = 'metadata-box hidden';
         
-        // Create drag handle (title bar)
-        this.dragHandle = document.createElement('div');
-        this.dragHandle.className = 'metadata-drag-handle';
-        this.dragHandle.innerHTML = '⋮⋮ Image Info';
+        // Create content wrapper for flexbox layout
+        this.contentWrapper = document.createElement('div');
+        this.contentWrapper.className = 'metadata-content-wrapper';
         
-        // Create filename display
-        this.filenameDisplay = document.createElement('div');
-        this.filenameDisplay.className = 'metadata-filename';
-        this.filenameDisplay.textContent = 'No filename available';
+        // Create all child elements
+        const elements = [
+            { el: 'dragHandle', class: 'metadata-drag-handle', content: '\u24D8' },
+            { el: 'filenameDisplay', class: 'metadata-filename', content: 'No filename available' },
+            { el: 'resizeHandle', class: 'metadata-resize-handle', content: '' }
+        ];
         
-        // Create resize handle
-        this.resizeHandle = document.createElement('div');
-        this.resizeHandle.className = 'metadata-resize-handle';
-        this.resizeHandle.innerHTML = '⋯';
+        elements.forEach(({ el, class: className, content }) => {
+            this[el] = document.createElement('div');
+            this[el].className = className;
+            if (content) this[el].textContent = content;
+            this.contentWrapper.appendChild(this[el]);
+        });
         
-        this.metadataBox.appendChild(this.dragHandle);
-        this.metadataBox.appendChild(this.filenameDisplay);
-        this.metadataBox.appendChild(this.resizeHandle);
+        this.metadataBox.appendChild(this.contentWrapper);
         document.body.appendChild(this.metadataBox);
     }
     
     setupInteractions() {
-        // Dragging functionality
+        // Shared document event listeners (DRY principle)
+        document.addEventListener('mousemove', (e) => {
+            this.handleDrag(e);
+            this.handleResize(e);
+        });
+        document.addEventListener('mouseup', () => {
+            this.stopDrag();
+            this.stopResize();
+        });
+        
+        // Dragging functionality - only on the drag handle
         this.dragHandle.addEventListener('mousedown', (e) => this.startDrag(e));
-        document.addEventListener('mousemove', (e) => this.handleDrag(e));
-        document.addEventListener('mouseup', () => this.stopDrag());
         
-        // Resizing functionality
+        // Resizing functionality - on the right border
         this.resizeHandle.addEventListener('mousedown', (e) => this.startResize(e));
-        document.addEventListener('mousemove', (e) => this.handleResize(e));
-        document.addEventListener('mouseup', () => this.stopResize());
         
-        // Prevent text selection during drag/resize
-        this.dragHandle.addEventListener('selectstart', (e) => e.preventDefault());
-        this.resizeHandle.addEventListener('selectstart', (e) => e.preventDefault());
+        // Prevent text selection and drag only on interactive elements (DRY principle)
+        [this.dragHandle, this.resizeHandle].forEach(element => {
+            element.addEventListener('selectstart', (e) => e.preventDefault());
+            element.addEventListener('dragstart', (e) => e.preventDefault());
+        });
     }
     
     startDrag(e) {
@@ -59,7 +68,7 @@ class MetadataDisplay {
         const rect = this.metadataBox.getBoundingClientRect();
         this.dragOffset.x = e.clientX - rect.left;
         this.dragOffset.y = e.clientY - rect.top;
-        this.metadataBox.style.cursor = 'grabbing';
+        this.dragHandle.style.cursor = 'grabbing';
         e.preventDefault();
     }
     
@@ -82,7 +91,7 @@ class MetadataDisplay {
     
     stopDrag() {
         this.isDragging = false;
-        this.metadataBox.style.cursor = '';
+        this.dragHandle.style.cursor = '';
     }
     
     startResize(e) {
