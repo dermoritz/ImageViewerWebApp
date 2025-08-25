@@ -31,9 +31,7 @@ class ImageLoader {
     }
     
     async fetchMaxIndex(filter) {
-        const url = filter ? 
-            `${this.config.apiBaseUrl}/api/filter/${encodeURIComponent(filter)}/maxIndex` :
-            `${this.config.apiBaseUrl}/api/images/maxIndex`;
+        const url = Utils.buildApiUrl(this.config.apiBaseUrl, 'images/maxIndex', filter);
         const response = await fetch(url);
         
         if (!response.ok) {
@@ -45,10 +43,6 @@ class ImageLoader {
         return parseInt(data, 10);
     }
 
-    async loadRandomImage() {
-        await this.loadRandom();
-    }
-    
     async loadRandom(filter) {
         if (this.maxIndex === null) {
             const initialized = await this.initialize();
@@ -60,18 +54,12 @@ class ImageLoader {
         await this.loadByIndex(randomIndex, true, filter);
     }
     
-    async loadImageByIndex(index, updateUrl = true) {
-        await this.loadByIndex(index, updateUrl);
-    }
-    
     async loadByIndex(index, updateUrl = true, filter = null) {
         this.showLoading();
         this.hideError();
 
         try {
-            const url = filter ? 
-                `${this.config.apiBaseUrl}/api/filter/${encodeURIComponent(filter)}/images/${index}` :
-                `${this.config.apiBaseUrl}/api/images/${index}`;
+            const url = Utils.buildApiUrl(this.config.apiBaseUrl, 'images', filter, index);
             const response = await fetch(url);
 
             if (!response.ok) {
@@ -80,7 +68,7 @@ class ImageLoader {
 
             // Extract metadata from headers
             const contentDisposition = response.headers.get('Content-Disposition');
-            const filename = this.parseContentDisposition(contentDisposition);
+            const filename = Utils.parseContentDisposition(contentDisposition);
             this.currentMetadata = filter ? { filename, filter, index } : { filename };
 
             const blob = await response.blob();
@@ -105,35 +93,24 @@ class ImageLoader {
         }
     }
     
-    // Extract filename from Content-Disposition header
-    parseContentDisposition(headerValue) {
-        if (!headerValue) return null;
-        
-        // Parse "inline; filename="example.jpg""
-        const regex = /filename="([^"]+)"/;
-        const match = regex.exec(headerValue);
-        return match ? match[1] : null;
-    }
-
     onImageError(message = 'Failed to load image') {
-        this.hideLoading();
-        this.showError(message);
+        Utils.toggleElement(this.elements.loading, false);
+        Utils.toggleElement(this.elements.error, true, message);
     }
 
     showLoading() {
-        this.elements.loading.style.display = 'block';
+        Utils.toggleElement(this.elements.loading, true);
     }
 
     hideLoading() {
-        this.elements.loading.style.display = 'none';
+        Utils.toggleElement(this.elements.loading, false);
     }
 
     showError(message) {
-        this.elements.error.textContent = message;
-        this.elements.error.style.display = 'block';
+        Utils.toggleElement(this.elements.error, true, message);
     }
 
     hideError() {
-        this.elements.error.style.display = 'none';
+        Utils.toggleElement(this.elements.error, false);
     }
 }

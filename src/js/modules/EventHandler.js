@@ -1,11 +1,11 @@
 class EventHandler {
-    constructor(elements, zoomPan, imageLoader, stateManager, metadataDisplay, filterManager) {
-        this.elements = elements;
-        this.zoomPan = zoomPan;
-        this.imageLoader = imageLoader;
-        this.stateManager = stateManager;
-        this.metadataDisplay = metadataDisplay;
-        this.filterManager = filterManager;
+    constructor(app) {
+        this.elements = app.elements;
+        this.zoomPan = app.zoomPan;
+        this.imageLoader = app.imageLoader;
+        this.stateManager = app.stateManager;
+        this.metadataDisplay = app.metadataDisplay;
+        this.filterManager = app.filterManager;
         this.pointerPosition = { x: null, y: null };
     }
 
@@ -49,7 +49,13 @@ class EventHandler {
         
         if (event.code === 'Space' || event.code === 'KeyS') {
             event.preventDefault();
-            this.stateManager.navigateRandom();
+            this.stateManager.next();
+        } else if (event.code === 'ArrowRight' || event.code === 'ArrowDown') {
+            event.preventDefault();
+            this.stateManager.next();
+        } else if (event.code === 'ArrowLeft' || event.code === 'ArrowUp') {
+            event.preventDefault();
+            this.stateManager.prev();
         } else if (event.code === 'KeyW') {
             event.preventDefault();
             this.stateManager.goBack();

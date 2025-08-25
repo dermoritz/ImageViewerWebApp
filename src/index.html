@@ -12,6 +12,10 @@
         <input type="text" id="filterInput" placeholder="Filter..." />
         <div class="filter-count" id="filterCount" style="display: none;"></div>
         <button id="filterBtn">⚙</button>
+        <label class="sort-control">
+            <input type="checkbox" id="sortCheckbox" />
+            Sort
+        </label>
     </div>
     
     <div class="image-container" id="imageContainer">
@@ -22,6 +26,7 @@
     <div class="error" id="error" style="display: none;">Failed to load image</div>
     
     <script src="https://unpkg.com/@panzoom/panzoom@4.6.0/dist/panzoom.min.js"></script>
+    <script src="js/modules/Utils.js"></script>
     <script src="js/modules/ImageLoader.js"></script>
     <script src="js/modules/ZoomPan.js"></script>
     <script src="js/modules/StateManager.js"></script>

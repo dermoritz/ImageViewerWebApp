@@ -19,7 +19,7 @@ class ImageViewer {
         this.stateManager = new StateManager(this.imageLoader);
         this.metadataDisplay = new MetadataDisplay(this.elements);
         this.filterManager = new FilterManager(this.stateManager);
-        this.eventHandler = new EventHandler(this.elements, this.zoomPan, this.imageLoader, this.stateManager, this.metadataDisplay, this.filterManager);
+        this.eventHandler = new EventHandler(this);
         
         // Connect dependencies
         this.imageLoader.setStateManager(this.stateManager);
@@ -31,7 +31,7 @@ class ImageViewer {
         // Try to load from URL first, otherwise load random image
         const loadedFromUrl = await this.stateManager.loadFromUrl();
         if (!loadedFromUrl) {
-            await this.imageLoader.loadRandomImage();
+            await this.imageLoader.loadRandom();
         }
     }
 }

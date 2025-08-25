@@ -1,67 +1,111 @@
-// Central State Management - Single source of truth for filter state
+// Central State Management
 class StateManager {
     constructor(imageLoader) {
         this.imageLoader = imageLoader;
         this.currentFilter = null;
+        this.sortMode = false;
         this.filterManager = null;
         this.setupPopstateListener();
     }
     
-    // Central method to set state - handles both filter and normal mode
-    async setState(filter, index = null) {
+    // Main state setter - handles filter, sort, and index
+    async setState(filter, index = null, sort = null) {
         this.currentFilter = filter;
+        if (sort !== null) this.sortMode = sort;
         
         if (filter) {
             const maxIndex = await this.imageLoader.fetchMaxIndex(filter);
-            this.filterManager?.updateUI(filter, maxIndex);
-            index = index ?? Math.floor(Math.random() * (maxIndex + 1));
+            this.filterManager?.updateUI(filter, maxIndex, this.sortMode);
+            index = index ?? (this.sortMode ? 0 : Math.floor(Math.random() * (maxIndex + 1)));
             await this.imageLoader.loadByIndex(index, true, filter);
         } else {
-            this.filterManager?.updateUI('', null);
+            this.filterManager?.updateUI('', null, this.sortMode);
             if (index !== null) {
                 await this.imageLoader.loadByIndex(index, true);
             } else {
-                await this.imageLoader.loadRandom();
+                await this.imageLoader.loadRandom(null);
             }
         }
     }
     
-    // Update URL to reflect current image index
+    // Navigation methods
+    async getMaxIndex() {
+        return this.currentFilter ? 
+            await this.imageLoader.fetchMaxIndex(this.currentFilter) :
+            await this.imageLoader.fetchMaxIndex();
+    }
+    
+    async next() {
+        if (!this.sortMode) return this.imageLoader.loadRandom(this.currentFilter);
+        
+        const maxIndex = await this.getMaxIndex();
+        const nextIndex = this.imageLoader.currentIndex >= maxIndex ? 0 : this.imageLoader.currentIndex + 1;
+        await this.imageLoader.loadByIndex(nextIndex, true, this.currentFilter);
+    }
+    
+    async prev() {
+        if (!this.sortMode) return this.imageLoader.loadRandom(this.currentFilter);
+        
+        const maxIndex = await this.getMaxIndex();
+        const prevIndex = this.imageLoader.currentIndex <= 0 ? maxIndex : this.imageLoader.currentIndex - 1;
+        await this.imageLoader.loadByIndex(prevIndex, true, this.currentFilter);
+    }
+    
+    setSortMode(sort) {
+        this.sortMode = sort;
+        this.updateUrl(this.currentFilter, this.imageLoader.currentIndex);
+    }
+    
+    // Update URL to reflect current state
     updateUrl(filter, index) {
-        const newUrl = filter ? `#filter/${encodeURIComponent(filter)}/${index}` : `#images/${index}`;
+        const baseHash = filter ? 
+            `#filter/${encodeURIComponent(filter)}/${index}` : 
+            `#images/${index}`;
+        const newUrl = this.sortMode ? `${baseHash}?sort=true` : baseHash;
         if (window.location.hash !== newUrl) {
-            history.pushState({ filter, imageIndex: index }, '', newUrl);
+            history.pushState({ filter, imageIndex: index, sort: this.sortMode }, '', newUrl);
         }
     }
     
-    // Navigate back in history
     goBack() {
         if (history.length > 1) {
             history.back();
         }
     }
     
-    // Get current index from URL hash
     getCurrentIndexFromUrl() {
         const hash = window.location.hash;
-        const normal = /^#images\/(\d+)$/.exec(hash);
-        const filtered = /^#filter\/([^/]+)\/(\d+)$/.exec(hash);
+        if (!hash?.startsWith('#')) return null;
         
-        if (filtered) {
-            return { filter: decodeURIComponent(filtered[1]), index: parseInt(filtered[2], 10) };
+        const [hashPart, queryPart] = hash.split('?');
+        const sort = queryPart?.includes('sort=true') || false;
+        
+        // Try filter pattern: #filter/term/123
+        const filterRegex = /^#filter\/([^/]+)\/(\d+)$/;
+        const filterMatch = filterRegex.exec(hashPart);
+        if (filterMatch) {
+            return { 
+                filter: decodeURIComponent(filterMatch[1]), 
+                index: parseInt(filterMatch[2], 10), 
+                sort 
+            };
         }
-        if (normal) {
-            return { index: parseInt(normal[1], 10) };
+        
+        // Try normal pattern: #images/123
+        const normalRegex = /^#images\/(\d+)$/;
+        const normalMatch = normalRegex.exec(hashPart);
+        if (normalMatch) {
+            return { index: parseInt(normalMatch[1], 10), sort };
         }
+        
         return null;
     }
     
-    // Handle browser back/forward navigation
     setupPopstateListener() {
-        window.addEventListener('popstate', (event) => {
+        window.addEventListener('popstate', () => {
             const urlData = this.getCurrentIndexFromUrl();
-            if (urlData && urlData.index !== this.imageLoader.currentIndex) {
-                this.setState(urlData.filter || null, urlData.index);
+            if (urlData?.index !== this.imageLoader.currentIndex) {
+                this.setState(urlData.filter || null, urlData.index, urlData.sort);
             }
         });
     }
@@ -70,20 +114,12 @@ class StateManager {
         this.filterManager = filterManager;
     }
     
-    // Load image from current URL on app start
     async loadFromUrl() {
         const urlData = this.getCurrentIndexFromUrl();
         if (urlData) {
-            await this.setState(urlData.filter || null, urlData.index);
+            await this.setState(urlData.filter || null, urlData.index, urlData.sort);
             return true;
         }
         return false;
-    }
-    
-    // Public API for components
-    isFiltered() { return !!this.currentFilter; }
-    getCurrentFilter() { return this.currentFilter; }
-    async navigateRandom() { 
-        return this.setState(this.currentFilter);
     }
 }

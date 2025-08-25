@@ -4,9 +4,7 @@ class MetadataDisplay {
         this.elements = elements;
         this.isVisible = false;
         this.currentMetadata = null;
-        this.isDragging = false;
         this.isResizing = false;
-        this.dragOffset = { x: 0, y: 0 };
         this.createMetadataBox();
         this.setupInteractions();
     }
@@ -40,58 +38,19 @@ class MetadataDisplay {
     }
     
     setupInteractions() {
-        // Shared document event listeners (DRY principle)
-        document.addEventListener('mousemove', (e) => {
-            this.handleDrag(e);
-            this.handleResize(e);
-        });
-        document.addEventListener('mouseup', () => {
-            this.stopDrag();
-            this.stopResize();
-        });
-        
-        // Dragging functionality - only on the drag handle
-        this.dragHandle.addEventListener('mousedown', (e) => this.startDrag(e));
+        // Make the metadata box draggable using the drag handle
+        Utils.makeDraggable(this.metadataBox, this.dragHandle);
         
         // Resizing functionality - on the right border
         this.resizeHandle.addEventListener('mousedown', (e) => this.startResize(e));
         
-        // Prevent text selection and drag only on interactive elements (DRY principle)
-        [this.dragHandle, this.resizeHandle].forEach(element => {
-            element.addEventListener('selectstart', (e) => e.preventDefault());
-            element.addEventListener('dragstart', (e) => e.preventDefault());
-        });
-    }
-    
-    startDrag(e) {
-        this.isDragging = true;
-        const rect = this.metadataBox.getBoundingClientRect();
-        this.dragOffset.x = e.clientX - rect.left;
-        this.dragOffset.y = e.clientY - rect.top;
-        this.dragHandle.style.cursor = 'grabbing';
-        e.preventDefault();
-    }
-    
-    handleDrag(e) {
-        if (!this.isDragging) return;
+        // Shared document event listeners for resizing
+        document.addEventListener('mousemove', (e) => this.handleResize(e));
+        document.addEventListener('mouseup', () => this.stopResize());
         
-        const x = e.clientX - this.dragOffset.x;
-        const y = e.clientY - this.dragOffset.y;
-        
-        // Keep within viewport bounds
-        const maxX = window.innerWidth - this.metadataBox.offsetWidth;
-        const maxY = window.innerHeight - this.metadataBox.offsetHeight;
-        
-        const clampedX = Math.max(0, Math.min(x, maxX));
-        const clampedY = Math.max(0, Math.min(y, maxY));
-        
-        this.metadataBox.style.left = `${clampedX}px`;
-        this.metadataBox.style.top = `${clampedY}px`;
-    }
-    
-    stopDrag() {
-        this.isDragging = false;
-        this.dragHandle.style.cursor = '';
+        // Prevent text selection and drag on resize handle
+        this.resizeHandle.addEventListener('selectstart', (e) => e.preventDefault());
+        this.resizeHandle.addEventListener('dragstart', (e) => e.preventDefault());
     }
     
     startResize(e) {
@@ -109,9 +68,9 @@ class MetadataDisplay {
         const deltaX = e.clientX - this.startX;
         const newWidth = this.startWidth + deltaX;
         
-        // Set minimum and maximum width
-        const minWidth = 200;
-        const maxWidth = window.innerWidth * 0.8;
+        // Set minimum and maximum width using constants
+        const minWidth = Utils.VIEWPORT_BOUNDS.MIN_METADATA_WIDTH;
+        const maxWidth = window.innerWidth * Utils.VIEWPORT_BOUNDS.MAX_METADATA_WIDTH_RATIO;
         const clampedWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
         
         this.metadataBox.style.width = `${clampedWidth}px`;
@@ -150,15 +109,5 @@ class MetadataDisplay {
         } else {
             this.filenameDisplay.textContent = 'No filename available';
         }
-    }
-    
-    // Extract filename from Content-Disposition header
-    parseContentDisposition(headerValue) {
-        if (!headerValue) return null;
-        
-        // Parse "inline; filename="example.jpg""
-        const regex = /filename="([^"]+)"/;
-        const match = regex.exec(headerValue);
-        return match ? match[1] : null;
     }
 }
