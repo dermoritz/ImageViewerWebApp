@@ -18,7 +18,7 @@ class ImageViewer {
         this.zoomPan = new ZoomPan(this.elements);
         this.stateManager = new StateManager(this.imageLoader);
         this.metadataDisplay = new MetadataDisplay(this.elements);
-        this.filterManager = new FilterManager(this.imageLoader, this.stateManager);
+        this.filterManager = new FilterManager(this.stateManager);
         this.eventHandler = new EventHandler(this.elements, this.zoomPan, this.imageLoader, this.stateManager, this.metadataDisplay, this.filterManager);
         
         // Connect dependencies

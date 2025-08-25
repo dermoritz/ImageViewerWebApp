@@ -49,9 +49,7 @@ class EventHandler {
         
         if (event.code === 'Space' || event.code === 'KeyS') {
             event.preventDefault();
-            this.filterManager.isActive() ? 
-                this.filterManager.navigateRandom() : 
-                this.imageLoader.loadRandomImage();
+            this.stateManager.navigateRandom();
         } else if (event.code === 'KeyW') {
             event.preventDefault();
             this.stateManager.goBack();

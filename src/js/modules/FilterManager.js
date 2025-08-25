@@ -1,9 +1,7 @@
-// Minimal Filter Manager - Only UI state, delegates everything else
+// UI Controller for Filter - Delegates state management to StateManager
 class FilterManager {
-    constructor(imageLoader, stateManager) {
-        this.imageLoader = imageLoader;
+    constructor(stateManager) {
         this.stateManager = stateManager;
-        this.currentFilter = null;
         
         this.input = document.getElementById('filterInput');
         this.btn = document.getElementById('filterBtn');
@@ -40,39 +38,18 @@ class FilterManager {
     }
     
     async toggle() {
-        const filter = this.input.value.trim();
-        filter ? await this.apply(filter) : await this.clear();
+        const filter = this.input.value.trim() || null;
+        await this.stateManager.setState(filter);
     }
     
-    async apply(filter) {
-        try {
-            const maxIndex = await this.imageLoader.fetchMaxIndex(filter);
-            this.updateCountDisplay(maxIndex);
-            await this.imageLoader.loadRandom(filter);
-            this.currentFilter = filter;
-        } catch (error) {
-            this.imageLoader.onImageError(`Filter failed: ${error.message}`);
-        }
-    }
-    
-    async clear() {
-        this.currentFilter = null;
-        this.input.value = '';
-        this.countDisplay.style.display = 'none';
-        await this.imageLoader.loadRandom();
-    }
-    
-    async loadFromUrl(filter, index) {
-        this.currentFilter = filter;
+    // Update UI state (called by StateManager)
+    updateUI(filter, maxIndex) {
         this.input.value = filter;
-        return this.imageLoader.loadByIndex(index, false, filter);
-    }
-    
-    isActive() { return !!this.currentFilter; }
-    navigateRandom() { return this.imageLoader.loadRandom(this.currentFilter); }
-    
-    updateCountDisplay(maxIndex) {
-        this.countDisplay.textContent = `(${maxIndex})`;
-        this.countDisplay.style.display = 'block';
+        if (maxIndex !== null) {
+            this.countDisplay.textContent = `(${maxIndex})`;
+            this.countDisplay.style.display = 'block';
+        } else {
+            this.countDisplay.style.display = 'none';
+        }
     }
 }

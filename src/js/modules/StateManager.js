@@ -1,8 +1,29 @@
-// State Management and Browser History
+// Central State Management - Single source of truth for filter state
 class StateManager {
     constructor(imageLoader) {
         this.imageLoader = imageLoader;
+        this.currentFilter = null;
+        this.filterManager = null;
         this.setupPopstateListener();
+    }
+    
+    // Central method to set state - handles both filter and normal mode
+    async setState(filter, index = null) {
+        this.currentFilter = filter;
+        
+        if (filter) {
+            const maxIndex = await this.imageLoader.fetchMaxIndex(filter);
+            this.filterManager?.updateUI(filter, maxIndex);
+            index = index ?? Math.floor(Math.random() * (maxIndex + 1));
+            await this.imageLoader.loadByIndex(index, true, filter);
+        } else {
+            this.filterManager?.updateUI('', null);
+            if (index !== null) {
+                await this.imageLoader.loadByIndex(index, true);
+            } else {
+                await this.imageLoader.loadRandom();
+            }
+        }
     }
     
     // Update URL to reflect current image index
@@ -39,10 +60,8 @@ class StateManager {
     setupPopstateListener() {
         window.addEventListener('popstate', (event) => {
             const urlData = this.getCurrentIndexFromUrl();
-            if (urlData?.filter && this.filterManager) {
-                this.filterManager.loadFromUrl(urlData.filter, urlData.index);
-            } else if (urlData?.index !== this.imageLoader.currentIndex) {
-                this.imageLoader.loadByIndex(urlData.index, false);
+            if (urlData && urlData.index !== this.imageLoader.currentIndex) {
+                this.setState(urlData.filter || null, urlData.index);
             }
         });
     }
@@ -54,12 +73,17 @@ class StateManager {
     // Load image from current URL on app start
     async loadFromUrl() {
         const urlData = this.getCurrentIndexFromUrl();
-        if (urlData?.filter && this.filterManager) {
-            return this.filterManager.loadFromUrl(urlData.filter, urlData.index);
-        } else if (urlData?.index) {
-            await this.imageLoader.loadByIndex(urlData.index, false);
+        if (urlData) {
+            await this.setState(urlData.filter || null, urlData.index);
             return true;
         }
         return false;
+    }
+    
+    // Public API for components
+    isFiltered() { return !!this.currentFilter; }
+    getCurrentFilter() { return this.currentFilter; }
+    async navigateRandom() { 
+        return this.setState(this.currentFilter);
     }
 }
