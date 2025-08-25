@@ -7,7 +7,7 @@ class StateManager {
     
     // Update URL to reflect current image index
     updateUrl(filter, index) {
-        const newUrl = filter ? `#images/${encodeURIComponent(filter)}/${index}` : `#images/${index}`;
+        const newUrl = filter ? `#filter/${encodeURIComponent(filter)}/${index}` : `#images/${index}`;
         if (window.location.hash !== newUrl) {
             history.pushState({ filter, imageIndex: index }, '', newUrl);
         }
@@ -24,7 +24,7 @@ class StateManager {
     getCurrentIndexFromUrl() {
         const hash = window.location.hash;
         const normal = /^#images\/(\d+)$/.exec(hash);
-        const filtered = /^#images\/([^/]+)\/(\d+)$/.exec(hash);
+        const filtered = /^#filter\/([^/]+)\/(\d+)$/.exec(hash);
         
         if (filtered) {
             return { filter: decodeURIComponent(filtered[1]), index: parseInt(filtered[2], 10) };
