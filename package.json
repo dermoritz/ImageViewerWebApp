@@ -4,8 +4,6 @@
   "description": "Minimalistic image viewer with zoom and pan",
   "scripts": {
     "dev": "node dev-server.js",
-    "dev-python": "cd src && python -m http.server 3000",
-    "dev-node": "cd src && npx serve -p 3000",
     "install-deps": "npm install express http-proxy-middleware"
   },
   "keywords": [
