@@ -34,10 +34,10 @@ class ZoomPan {
     }
 
     calculateXYstart(zoomFactor) {
-        const result = { x: 0, y: 0 };
-        result.x = -(this.elements.image.naturalWidth - this.elements.image.naturalWidth * zoomFactor) / 2;
-        result.y = -(this.elements.image.naturalHeight - this.elements.image.naturalHeight * zoomFactor) / 2;
-        return result;
+        // Since CSS flexbox centers the image in the container,
+        // we don't need any additional translation offsets.
+        // Panzoom will handle scaling from the already-centered position.
+        return { x: 0, y: 0 };
     }
 
     zoomToPoint(event) {

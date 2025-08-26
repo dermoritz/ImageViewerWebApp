@@ -26,6 +26,9 @@ html, body {
     width: 100vw;
     height: 100vh;
     cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .image {
