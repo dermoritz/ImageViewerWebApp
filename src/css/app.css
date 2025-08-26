@@ -118,10 +118,6 @@ html, body {
     font-size: 12px;
 }
 
-.filter-box .drag-handle {
-    background: var(--handle-bg-hover);
-}
-
 .filter-box .drag-handle:before {
     content: '\29E9';
     color: var(--text-muted);
@@ -201,9 +197,31 @@ html, body {
 }
 
 .metadata-box.hidden {
-    opacity: 0;
-    transform: translateY(-10px);
-    pointer-events: none;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+    overflow: hidden;
+}
+
+.metadata-box.hidden .metadata-filename,
+.metadata-box.hidden .metadata-resize-handle,
+.metadata-box.hidden input[type="text"],
+.metadata-box.hidden button,
+.metadata-box.hidden .sort-control,
+.metadata-box.hidden .filter-count {
+    display: none;
+}
+
+.metadata-box.hidden .metadata-content-wrapper,
+.metadata-box.hidden .metadata-drag-handle,
+.metadata-box.hidden .drag-handle {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
 }
 
 .metadata-filename {

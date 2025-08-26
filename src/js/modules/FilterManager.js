@@ -9,6 +9,9 @@ class FilterManager {
         this.countDisplay = document.getElementById('filterCount');
         this.sortCheckbox = document.getElementById('sortCheckbox');
         
+        // Start collapsed
+        this.box.classList.add('hidden');
+        
         // Set button to always show green checkmark
         this.btn.textContent = '✓';
         this.btn.className = 'active';
@@ -20,6 +23,11 @@ class FilterManager {
         // Make the box draggable using the drag handle
         const dragHandle = this.box.querySelector('.drag-handle');
         Utils.makeDraggable(this.box, dragHandle);
+        
+        // Add click event to drag handle for toggling visibility
+        dragHandle.addEventListener('click', () => {
+            this.box.classList.toggle('hidden');
+        });
     }
     
     async toggle() {

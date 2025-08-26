@@ -41,6 +41,11 @@ class MetadataDisplay {
         // Make the metadata box draggable using the drag handle
         Utils.makeDraggable(this.metadataBox, this.dragHandle);
         
+        // Add click event to drag handle for toggling visibility
+        this.dragHandle.addEventListener('click', (e) => {
+            this.toggle();
+        });
+        
         // Resizing functionality - on the right border
         this.resizeHandle.addEventListener('mousedown', (e) => this.startResize(e));
         
