@@ -1,3 +1,6 @@
+/* Import component styles */
+@import url('loading-spinner.css');
+
 /* Minimal Image Viewer CSS */
 :root {
     --primary-color: #4CAF50;
@@ -34,19 +37,6 @@ html, body {
 .image {
     display: block;
     user-select: none;
-}
-
-.loading, .error {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
-    font-size: 18px;
-}
-
-.error {
-    color: var(--error-color);
 }
 
 /* Unified transitions */

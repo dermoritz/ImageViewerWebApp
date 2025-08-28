@@ -1,0 +1,30 @@
+/* Loading Spinner Styles */
+
+.loading, .error {
+    position: fixed;
+    top: 5%;
+    right: 0%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 18px;
+}
+
+.loading::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ffffff40;
+    border-top: 2px solid #ea00ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error {
+    color: var(--error-color);
+}
