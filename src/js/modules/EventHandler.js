@@ -9,6 +9,7 @@ class EventHandler {
         this.pointerPosition = { x: null, y: null };
         this.lastTapTime = 0;
         this.touchStart = null;
+        this.globalTouchStart = null;
     }
 
     setupEventListeners() {
@@ -21,6 +22,10 @@ class EventHandler {
         
         this.elements.image.addEventListener('dragstart', (e) => e.preventDefault());
         document.addEventListener('keydown', (e) => this.onKeyDown(e));
+        
+        // Global touch events for vertical swipes (separate from pointer events)
+        document.body.addEventListener('touchstart', (e) => this.onGlobalTouchStart(e), { passive: false });
+        document.body.addEventListener('touchend', (e) => this.onGlobalTouchEnd(e), { passive: false });
     }
 
     onImageLoad() {
@@ -87,6 +92,43 @@ class EventHandler {
         } else if (event.code === 'KeyQ') {
             event.preventDefault();
             this.metadataDisplay.toggle();
+        } else if (event.code === 'Escape') {
+            event.preventDefault();
+            this.stateManager.toggleImageVisibility();
+        }
+    }
+
+    onGlobalTouchStart(event) {
+        // Only track single finger touches to avoid conflicts with zoom gestures
+        if (event.touches.length === 1) {
+            this.globalTouchStart = {
+                x: event.touches[0].clientX,
+                y: event.touches[0].clientY,
+                time: Date.now()
+            };
+        }
+    }
+
+    onGlobalTouchEnd(event) {
+        if (!this.globalTouchStart || event.changedTouches.length !== 1) return;
+        
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - this.globalTouchStart.x;
+        const deltaY = touch.clientY - this.globalTouchStart.y;
+        const deltaTime = Date.now() - this.globalTouchStart.time;
+        
+        this.globalTouchStart = null;
+        
+        // Check for vertical swipe: quick, vertical, significant distance
+        if (deltaTime < 500 && Math.abs(deltaY) > 50 && Math.abs(deltaY) > Math.abs(deltaX)) {
+            const isSwipeDown = deltaY > 0;
+            const shouldToggle = (isSwipeDown && !this.stateManager.isImageHidden) || 
+                               (!isSwipeDown && this.stateManager.isImageHidden);
+            
+            if (shouldToggle) {
+                this.stateManager.toggleImageVisibility();
+                event.preventDefault();
+            }
         }
     }
 }

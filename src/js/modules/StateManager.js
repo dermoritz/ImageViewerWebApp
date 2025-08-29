@@ -5,6 +5,7 @@ class StateManager {
         this.currentFilter = null;
         this.sortMode = false;
         this.filterManager = null;
+        this.isImageHidden = false;
         this.setupPopstateListener();
     }
     
@@ -54,6 +55,15 @@ class StateManager {
     setSortMode(sort) {
         this.sortMode = sort;
         this.updateUrl(this.currentFilter, this.imageLoader.currentIndex);
+    }
+    
+    // Toggle image visibility
+    toggleImageVisibility() {
+        this.isImageHidden = !this.isImageHidden;
+        const image = document.getElementById('image');
+        if (image) {
+            image.style.visibility = this.isImageHidden ? 'hidden' : 'visible';
+        }
     }
     
     // Update URL to reflect current state
