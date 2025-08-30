@@ -9,6 +9,7 @@ class EventHandler {
         this.pointerPosition = { x: null, y: null };
         this.lastTapTime = 0;
         this.globalTouchStart = null;
+        this.preventContextMenu = (e) => e.preventDefault();
     }
 
     setupEventListeners() {
@@ -41,6 +42,7 @@ class EventHandler {
         if (shouldZoom) {
             this.pointerPosition = { x: event.x, y: event.y };
             this.elements.imageContainer.style.cursor = 'none';
+            this.elements.image.addEventListener('contextmenu', this.preventContextMenu);
             this.zoomPan.zoomToPoint(event);
         }
         
@@ -50,6 +52,7 @@ class EventHandler {
     onPointerUp(event) {
         this.zoomPan.resetZoom();
         this.elements.imageContainer.style.cursor = 'default';
+        this.elements.image.removeEventListener('contextmenu', this.preventContextMenu);
         this.pointerPosition = { x: null, y: null };
     }
 
