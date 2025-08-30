@@ -8,7 +8,6 @@ class EventHandler {
         this.filterManager = app.filterManager;
         this.pointerPosition = { x: null, y: null };
         this.lastTapTime = 0;
-        this.touchStart = null;
         this.globalTouchStart = null;
     }
 
@@ -45,27 +44,13 @@ class EventHandler {
             this.zoomPan.zoomToPoint(event);
         }
         
-        if (isTouch) {
-            this.touchStart = { x: event.x, y: event.y };
-        }
         this.lastTapTime = now;
     }
 
     onPointerUp(event) {
-        const wasZooming = this.pointerPosition.x !== null;
         this.zoomPan.resetZoom();
         this.elements.imageContainer.style.cursor = 'default';
-        this.pointerPosition = { x: null, y: null }; // Reset position
-        
-        // Check for swipe only if we weren't zooming/panning
-        if (this.touchStart && event.pointerType === 'touch' && !wasZooming) {
-            const deltaX = event.x - this.touchStart.x;
-            if (Math.abs(deltaX) > 50) { // Swipe threshold
-                if (deltaX > 0) this.stateManager.goBack(); // Swipe right → goBack (W key)
-                else this.stateManager.next(); // Swipe left → next (S key)
-            }
-        }
-        this.touchStart = null;
+        this.pointerPosition = { x: null, y: null };
     }
 
     onPointerMove(event) {
@@ -119,14 +104,23 @@ class EventHandler {
         
         this.globalTouchStart = null;
         
-        // Check for vertical swipe: quick, vertical, significant distance
-        if (deltaTime < 500 && Math.abs(deltaY) > 50 && Math.abs(deltaY) > Math.abs(deltaX)) {
-            const isSwipeDown = deltaY > 0;
-            const shouldToggle = (isSwipeDown && !this.stateManager.isImageHidden) || 
-                               (!isSwipeDown && this.stateManager.isImageHidden);
-            
-            if (shouldToggle) {
-                this.stateManager.toggleImageVisibility();
+        // Only process quick swipes to avoid conflicts with zoom/pan
+        if (deltaTime < 500 && (Math.abs(deltaX) > 50 || Math.abs(deltaY) > 50)) {
+            // Vertical swipes take priority (hide/unhide)
+            if (Math.abs(deltaY) > Math.abs(deltaX)) {
+                const isSwipeDown = deltaY > 0;
+                const shouldToggle = (isSwipeDown && !this.stateManager.isImageHidden) || 
+                                   (!isSwipeDown && this.stateManager.isImageHidden);
+                
+                if (shouldToggle) {
+                    this.stateManager.toggleImageVisibility();
+                    event.preventDefault();
+                }
+            }
+            // Horizontal swipes (navigation)
+            else {
+                if (deltaX > 0) this.stateManager.goBack(); // Swipe right → goBack
+                else this.stateManager.next(); // Swipe left → next
                 event.preventDefault();
             }
         }
